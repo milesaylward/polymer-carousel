@@ -1,0 +1,256 @@
+<!-- Load the Polymer.Element base class -->
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="my-mixin.html">
+
+<dom-module id="my-carousel">
+  <template>
+
+    <!-- You must define your styles inside the Element -->
+    <style>
+
+      :host {
+        display: block;
+        position: relative;
+        overflow: hidden;
+      }
+
+      div > ::slotted(:not([selected])) {
+        display: none;
+      }
+
+      button {
+        position: absolute;
+        top: calc(50% - 20px);
+        padding: 0;
+        line-height: 40px;
+        border: none;
+        background: none;
+        color: #ddd;
+        font-size: 48px;
+        font-weight: bold;
+        opacity: 0.7;
+      }
+
+      button:hover,
+      button:focus {
+        opacity: 1;
+      }
+
+      #prevBtn {
+        left: 12px;
+      }
+
+      #nextBtn {
+        right: 12px;
+      }
+
+      button[disabled] {
+        opacity: 0.4;
+      }
+
+    </style>
+
+    <div>
+      <slot></slot>
+    </div>
+
+    <button id="prevBtn" on-click="previous">&#x276e;</button>
+    <button id="nextBtn" on-click="next">&#x276f;</button>
+
+  </template>
+
+  <script>
+
+    // Normal class extends such as react class extends component
+    class MyCarousel extends MyMixin(Polymer.Element) {
+
+      static get is() { return 'my-carousel' }
+
+      connectedCallback() {
+        super.connectedCallback();
+
+        requestAnimationFrame(this._installListeners.bind(this));
+      }
+
+      _selectedChanged(selected, lastSelected) {
+        //makes a callback to the super class function called _selectedChanged
+        //code beneath this well still be invoked as element specific code
+        super._selectedChanged(selected, lastSelected);
+
+        if(selected) {
+          this.$.prevBtn.disabled = !selected.previousElementSibling;
+          this.$.nextBtn.disabled = !selected.nextElementSibling;
+
+          this._loadImage(selected);
+          this._loadImage(selected.previousElementSibling);
+          this._loadImage(selected.nextElementSibling);
+        } else {
+          this.$.prevBtn.disabled = true;
+          this.$.nextBtn.disabled = true;
+        }
+      }
+
+      previous() {
+        const elem = this.selected && this.selected.previousElementSibling;
+        if (elem && !this._touchDir) {
+          const lastSelected = this.selected;
+          this._translateX(lastSelected, 0);
+          this._translateX(elem, -this.offsetWidth);
+
+          this.selected = elem;
+          this._translateX(lastSelected, this.offsetWidth, true);
+          this._translateX(elem, 0, true)
+        }
+      }
+
+      next() {
+        const elem = this.selected && this.selected.nextElementSibling;
+        if (elem && !this._touchDir) {
+          const lastSelected = this.selected;
+          this._translateX(lastSelected, 0);
+          this._translateX(elem, this.offsetWidth);
+
+          this.selected = elem;
+          this._translateX(lastSelected, -this.offsetWidth, true);
+          this._translateX(elem, 0, true);
+        }
+      }
+
+      _loadImage(img) {
+        if (img && !img.src) {
+          img.src = this.getAttribute('data-src');
+        }
+      }
+
+      _translateX(elem, x, transition) {
+        elem.style.display = 'block';
+        elem.style.transition = transition ? 'transform 0.2s' : '';
+        elem.style.transform = `translate3d(${x}px, 0, 0)`;
+      }
+
+      //if statements are there because there is no need for transitions if there are less than 2 images.
+
+      _touchstart(e) {
+        if(this.childElementCount < 2 ) {
+          return;
+        }
+        //save the start coordinates
+        if(!this._touchDir) {
+          this._startX = event.changedTouches[0].clientX;
+          this._startY = event.changedTouches[0].clientY;
+        }
+      }
+      //test if users moved horizontally or vertically
+      _touchmove(e) {
+        if(this.childElementCount < 2 ) {
+          return;
+        }
+
+        if(!this._touchDir) {
+          const absX = Math.abs(event.changedTouches[0].clientX - this._startX);
+          const absY = Math.abs(event.changedTouches[0].clientY - this._startY);
+          this._touchDir = absX > absY ? 'x' : 'y';
+        }
+
+        if(this._touchDir === 'x') {
+          //stop vertical scrolling when swiping
+          e.preventDefault();
+
+          let dx = Math.round(event.changedTouches[0].clientX - this._startX);
+          const prevChild = this.selected.previousElementSibling;
+          const nextChild = this.selected.nextElementSibling;
+
+          if((!prevChild && dx > 0) || (!nextChild && dx < 0)) {
+            dx = 0;
+          }
+
+          this._translateX(this.selected, dx);
+          if(prevChild) {
+            this._translateX(prevChild, dx - this.offsetWidth);
+          }
+          if(nextChild) {
+            this._translateX(nextChild, dx + this.offsetWidth);
+          }
+        }
+
+      }
+
+      _touchend(e) {
+        if(this.childElementCount < 2 ) {
+          return;
+        }
+
+        if (e.touches.length) {
+          return;
+        }
+
+        if(this._touchDir === 'x') {
+          let dx = Math.round(e.changedTouches[0].clientX - this._startX);
+
+          const prevChild = this.selected.previousElementSibling;
+          const nextChild = this.selected.nextElementSibling;
+
+          if((!prevChild && dx > 0) || (!nextChild && dx < 0)) {
+            dx = 0;
+        }
+
+        if (dx > 0){
+          if (dx > 100) {
+            if (dx === this.offsetWidth) {
+              this._resetChildrenStyles();
+            } else {
+              this._translateX(prevChild, 0 , true);
+              this._translateX(this.selected, this.offsetWidth, true);
+            }
+            this.selected = prevChild;
+          } else {
+            this._translateX(prevChild, -this.offsetWidth, true);
+            this._translateX(this.selected, 0, true);
+          }
+        } else if (dx < 0) {
+            if (dx < 0) {
+              if (dx < -100) {
+                if (dx < -this.offsetWidth) {
+                  this._resetChildrenStyles();
+                } else {
+                  this._translateX(this.selected, 0, true);
+                  this._translateX(nextChild, -this.offsetWidth, true);
+                }
+                this.selected = nextChild;
+              } else {
+                this._translateX(this.selected, 0, true);
+                this._translateX(nextChild, this.offsetWidth, true)
+              }
+            } else {
+              this._resetChildrenStyles();
+            }
+          }
+          //reset touch direction
+          this._touchDir = null;
+        }
+      }
+
+      _installListeners() {
+        this.addEventListener('transitioned', this._resetChildrenStyles.bind(this));
+        this.addEventListener('touchstart', this._touchstart.bind(this));
+        this.addEventListener('touchmove', this._touchmove.bind(this));
+        this.addEventListener('touchend', this._touchend.bind(this));
+      }
+
+      _resetChildrenStyles() {
+        let elem = this.firstElementChild;
+        while (elem) {
+          elem.style.display = '';
+          elem.style.transition = '';
+          elem.style.transform = '';
+          elem = elem.nextElementSibling;
+        }
+      }
+
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(MyCarousel.is, MyCarousel);
+
+  </script>
+</dom-module>
