@@ -10,7 +10,7 @@
   <link rel="import" href="my-carousel.html">
   <style>
     my-carousel {
-      width: 60%;
+      width: 70%;
       margin: 100px auto;
       contain: content;
     }
@@ -26,21 +26,42 @@
       width: 100%;
       height: 100%;
     }
+
+    .container {
+      display: flex;
+    }
+
+    .info {
+        margin-top: 100px;
+        width: 300px;
+    }
+
+    ul li {
+      font-size: 20px;
+    }
+
+
   </style>
 </head>
 
 <body>
-  <my-carousel>
-    <img src="https://app-layout-assets.appspot.com/assets/bg1.jpg">
-    <img src="https://app-layout-assets.appspot.com/assets/bg2.jpg">
-    <img src="https://app-layout-assets.appspot.com/assets/bg3.jpg">
-    <img src="https://app-layout-assets.appspot.com/assets/bg4.jpg">
-  </my-carousel>
-
-  <script>
-    const carousel = document.querySelector('my-carousel');
-    setInterval(_ => carousel.next(), 3000);
-  </script>
-
-</body>
+  <div class="container">
+    <ul class="info">
+      <h3>Fun Facts about my images.<br>Click the arrows to scroll through!</h3>
+      <li>My previous Career was as a chef.</li>
+      <li>I still love to cook, just not as a career, favorite food to make. RAMEN!</li>
+      <li>I build my christmas tree out of the beer bottles I save up every year</li>
+      <li>I have a PHD in sarcasm haha </li>
+      <li>I played in a metal band during college</li>
+    </ul>
+    <my-carousel>
+      <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498223553/chef_lfcv4y.jpg">
+      <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498224055/ramen_xwtel2.jpg">
+      <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498223553/beer_tree_slc02l.jpg">
+      <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498223553/sarcasm_rdxqnf.jpg">
+      <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498223553/guitar_dlbxdf.jpg">
+      <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498223553/1377573_10200662828235628_219286649_n_tozgh9.jpg">
+    </my-carousel>
+    </div>
+  </body>
 </html>
