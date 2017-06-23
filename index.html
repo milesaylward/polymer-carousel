@@ -11,7 +11,7 @@
   <link rel="import" href="my-carousel.html">
   <style>
     my-carousel {
-      width: 70%;
+      width: 50%;
       margin: 100px auto;
       contain: content;
     }
@@ -34,13 +34,34 @@
 
     .info {
         margin-top: 100px;
-        width: 300px;
+        width: 40%;
     }
 
     ul li {
       font-size: 20px;
     }
 
+    .button-container{
+      display: flex;
+      justify-content: center;
+    }
+
+    .button-container button {
+      font-size: 24px;
+      margin: 10px;
+    }
+
+    .warning {
+      text-align: center;
+      color: red;
+      font-size: 18px;
+      opacity: 0;
+      transition: all ease 1.5s;
+    }
+
+    .visible {
+      opacity: 1;
+    }
 
   </style>
 </head>
@@ -65,10 +86,13 @@
       <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498223553/guitar_dlbxdf.jpg">
       <img src="http://res.cloudinary.com/milesaylward/image/upload/v1498223553/1377573_10200662828235628_219286649_n_tozgh9.jpg">
     </my-carousel>
+    </div>
+    <div class="warning">
+      Polymer is a headache. If you hit stop you have to manually scroll till I figure out how to fix it lol.
+    </div>
     <div class="button-container">
       <button id="start">Start</button>
       <button id="stop">Stop</button>
-    </div>
     </div>
     <script src="main.js" charset="utf-8"></script>
   </body>
